@@ -17,6 +17,8 @@ namespace WindowsFormsApplication2
         static IWebDriver driverGC;
         static ChromeOptions options = new ChromeOptions();
         System.Collections.ObjectModel.ReadOnlyCollection<OpenQA.Selenium.IWebElement> curInputElements, curAElements, curImgElements, curSpanElements, curRoleElements;
+
+        bool profileListOk = false;
         static UInt16 b12Profile = 1;
         
         
@@ -45,9 +47,11 @@ namespace WindowsFormsApplication2
         {
             
             driverGC = new ChromeDriver(@"C:\", options, new TimeSpan(0, 0, 0, 5));
+            System.Threading.Thread.Sleep(10);
             driverGC.Navigate().GoToUrl("http://10.17.0.48/b12data");
+            System.Threading.Thread.Sleep(10);
             driverGC.Manage().Timeouts().SetPageLoadTimeout(TimeSpan.FromSeconds(5));
-
+            System.Threading.Thread.Sleep(10);
             leechElements();
 
             
@@ -65,11 +69,11 @@ namespace WindowsFormsApplication2
             {
                 updateStatus("Page Has Been Successfully Loaded");
                 updateStatus("Trying To Login");
-                myStep1();
+                procedureLogin();
             }
         }
 
-        public void myStep1()
+        public void procedureLogin()
         {
             foreach (IWebElement elem in curInputElements)
             {
@@ -88,24 +92,6 @@ namespace WindowsFormsApplication2
                 }
                 
             }
-
-            //System.Threading.Thread.Sleep(500);
-            //bool loadOkFlag = false;
-            //while (loadOkFlag == false)
-            //{
-            //    System.Collections.ObjectModel.ReadOnlyCollection<OpenQA.Selenium.IWebElement> tempElements;
-            //    tempElements = driverGC.FindElements(By.TagName("div"));
-            //    foreach (IWebElement elem in tempElements)
-            //    {
-            //        string elemName;
-            //        elemName = elem.GetAttribute("id");
-            //        if (elemName == "logo")
-            //        {
-            //            loadOkFlag = true;
-            //            break;
-            //        }
-            //    }
-            //}
 
 
 
@@ -137,9 +123,10 @@ namespace WindowsFormsApplication2
             else if(richTextBox1.Find("searchListView") != -1)
             {
                 updateStatus("Login Successful");
-                if(richTextBox1.Find("value = 1") != -1 && richTextBox1.Find("value = 21") != -1 && richTextBox1.Find("value = 22") != -1)
+                System.Threading.Thread.Sleep(10);
+                procedureSelectProfile();
+                if(profileListOk == true)
                 {
-                    updateStatus("Profile List Is Up-To-Date");
                     curRoleElements = driverGC.FindElements(By.CssSelector("[role=\"option\"]"));
                     foreach (IWebElement elem in curRoleElements)
                     {
@@ -155,11 +142,63 @@ namespace WindowsFormsApplication2
                             break;
                         }
                     }
-
-                }
-                else
-                {
-                    updateStatus("Profile List Is Out-Dated or Missing");
+                    richTextBox1.Text = "";
+                    leechElements();
+                    System.Threading.Thread.Sleep(10);
+                    foreach (IWebElement elem in curSpanElements)
+                    {
+                        if (elem.GetAttribute("class") == "k-icon k-plus")
+                        {
+                            elem.Click();
+                            System.Threading.Thread.Sleep(10);
+                        }
+                    }
+                    leechElements();
+                    foreach (IWebElement elem in curSpanElements)
+                    {
+                        if (elem.GetAttribute("class") == "k-icon k-plus")
+                        {
+                            elem.Click();
+                            System.Threading.Thread.Sleep(10);
+                        }
+                    }
+                    leechElements();
+                    foreach (IWebElement elem in curSpanElements)
+                    {
+                        if (elem.GetAttribute("class") == "k-icon k-plus")
+                        {
+                            elem.Click();
+                            System.Threading.Thread.Sleep(10);
+                        }
+                    }
+                    leechElements();
+                    foreach (IWebElement elem in curSpanElements)
+                    {
+                        if (elem.GetAttribute("class") == "k-icon k-plus")
+                        {
+                            elem.Click();
+                            System.Threading.Thread.Sleep(10);
+                        }
+                    }
+                    leechElements();
+                    foreach (IWebElement elem in curSpanElements)
+                    {
+                        string elemName;
+                        if (elem.GetAttribute("class") == "B12-treenode")
+                        {
+                            elemName = elem.Text;
+                            richTextBox1.AppendText(elemName + "\n");
+                        }
+                        if (elem.GetAttribute("class") == "b12-treecm")
+                        {
+                            elemName = elem.Text;
+                            richTextBox1.AppendText(elemName + " ->\n");
+                        }
+                    }
+                    if (richTextBox1.Text != "")
+                    {
+                        updateStatus("Menu Tree Is Available.");
+                    }
                 }
             }
 
@@ -168,6 +207,7 @@ namespace WindowsFormsApplication2
         public void updateStatus(string statusString)
         {
             richTextBox3.AppendText(statusString + "\n");
+            while (richTextBox3.Find(statusString) == -1) ;
         }
 
         public void leechElements()
@@ -176,6 +216,20 @@ namespace WindowsFormsApplication2
             curAElements = driverGC.FindElements(By.TagName("a"));
             curImgElements = driverGC.FindElements(By.TagName("img"));
             curSpanElements = driverGC.FindElements(By.TagName("span"));
+        }
+        public void procedureSelectProfile()
+        {
+            if (richTextBox1.Find("value = 1") != -1 && richTextBox1.Find("value = 21") != -1 && richTextBox1.Find("value = 22") != -1)
+            {
+                updateStatus("Profile List Is Up-To-Date");
+                profileListOk = true;
+
+            }
+            else
+            {
+                updateStatus("Profile List Is Out-Dated or Missing");
+                profileListOk = false;
+            }
         }
     }
 }
